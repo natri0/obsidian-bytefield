@@ -44,3 +44,17 @@ also, to make an unnamed field that still takes up space (padding), just omit th
     ```
 
 <img width="553" alt="diagram with one empty/padding byte" src="https://github.com/user-attachments/assets/6567ced3-87c5-4edb-974f-7c3c4946c86c" />
+
+## building
+
+unlike most, this project is built with [Bun](https://bun.sh/). to build the `main.js` file:
+```bash
+bun run build
+```
+
+to watch:
+```bash
+bun run watch
+```
+
+doing it this way keeps minimal dependencies as Bun supports TypeScript out of the box, and also has a bundler built-in.
