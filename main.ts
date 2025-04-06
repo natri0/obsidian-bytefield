@@ -40,10 +40,27 @@ export default class BytediagPlugin extends Plugin {
           let width = parseInt(parts[1]);
           while (width > 0) {
             if (st.curTr == null || st.curWidth >= st.maxWidth) nextRow(st);
-            const w = Math.min(width, st.maxWidth - st.curWidth);
-            width -= w;
-            st.curTr?.createEl('td', { attr: { colspan: '' + w }, text: (parts[0] !== null ? parts[0] as string : '') + (width > 0 ? '...' : '') });
-            st.curWidth += w;
+
+            let colspan: number, rowspan: number | null = null;
+            if (st.curWidth === 1 && width >= st.maxWidth) {
+              colspan = st.maxWidth - 1;
+              rowspan = Math.floor(width / colspan);
+              width -= rowspan * colspan;
+            } else {
+              colspan = Math.min(width, st.maxWidth - st.curWidth);
+              width -= colspan;
+            }
+
+            st.curTr?.createEl('td', {
+              attr: { colspan, rowspan },
+              text: (parts[0] !== null ? parts[0] as string : '') + (width > 0 ? '...' : '')
+            });
+            st.curWidth += colspan;
+
+            while (rowspan !== null && rowspan > 0) {
+              nextRow(st);
+              rowspan--;
+            }
           }
         }
       }
