@@ -34,3 +34,13 @@ also, it is possible to change the offset where the diagram starts:
 fields are wrapped around if they're longer than the row:
 
 <img width="554" alt="diagram with one of the fields wrapping around" src="https://github.com/user-attachments/assets/a5d7132c-f54a-4b8c-9555-bd6aef8b0350" />
+
+also, to make an unnamed field that still takes up space (padding), just omit the part before the `: `:
+
+    ```bytefield
+    field1: 3
+    : 1
+    field2: 4
+    ```
+
+<img width="553" alt="diagram with one empty/padding byte" src="https://github.com/user-attachments/assets/6567ced3-87c5-4edb-974f-7c3c4946c86c" />
