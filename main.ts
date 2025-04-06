@@ -17,11 +17,10 @@ const nextRow = (st: TableState) => {
   st.curTr.createEl('td', { text: st.curOffset.toString(16) });
 };
 
-export default class BytediagPlugin extends Plugin {
+export default class BytefieldPlugin extends Plugin {
   async onload() {
-    this.registerMarkdownCodeBlockProcessor('bytediag', (source, el, ctx) => {
+    this.registerMarkdownCodeBlockProcessor('bytefield', (source, el, ctx) => {
       const lines = source.split('\n');
-      const parts = source.split('\n').map(line => line.split(': '));
 
       const table = el.createEl('table');
 

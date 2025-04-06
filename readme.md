@@ -10,7 +10,7 @@ a byte-field diagram is one of those tables that show offsets of fields in e.g. 
 
 to create one, simply make a codeblock and add your fields.
 
-    ```bytediag
+    ```bytefield
     field1: 3
     field2: 4
     field3: 1
@@ -22,7 +22,7 @@ every line has to contain the name of the field, `: ` as the delimiter and the l
 
 also, it is possible to change the offset where the diagram starts:
 
-    ```bytediag
+    ```bytefield
     !curOffset: 7
     field1: 5
     field2: 3
