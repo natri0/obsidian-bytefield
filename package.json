@@ -1,0 +1,13 @@
+{
+  "name": "obsidian-bytediag",
+  "version": "0.0.1",
+  "main": "main.js",
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "obsidian": "^1.8.7"
+  },
+  "scripts": {
+    "build": "bun build --outfile=main.js --target=node --packages=external --format=cjs ./main.ts",
+    "watch": "bun build --outfile=main.js --target=node --packages=external --format=cjs ./main.ts --watch"
+  }
+}
