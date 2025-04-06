@@ -1,6 +1,14 @@
-import { Plugin } from 'obsidian';
+import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
 
-const headings = ['', '0', '1', '2', '3', '4', '5', '6', '7'];
+interface SettingsData {
+  bytesPerRow: number;
+  offsetsInHex: boolean;
+};
+
+const DEFAULT_SETTINGS: Partial<SettingsData> = {
+  bytesPerRow: 8,
+  offsetsInHex: true
+};
 
 type TableState = {
   maxWidth: number;
@@ -8,27 +16,36 @@ type TableState = {
   curWidth: number;
   tbody: HTMLElement;
   curTr: HTMLElement | null;
+  offsetsHex: boolean;
 };
 
 const nextRow = (st: TableState) => {
   st.curWidth = 1;
   if (st.curTr != null) st.curOffset += (st.maxWidth - 1);
   st.curTr = st.tbody.createEl('tr');
-  st.curTr.createEl('td', { text: st.curOffset.toString(16) });
+  st.curTr.createEl('td', { text: st.curOffset.toString(st.offsetsHex ? 16 : 10) });
 };
 
 export default class BytefieldPlugin extends Plugin {
+  settings: SettingsData;
+
   async onload() {
+    await this.loadSettings();
+    this.addSettingTab(new BytefieldSettingTab(this.app, this));
+
     this.registerMarkdownCodeBlockProcessor('bytefield', (source, el, ctx) => {
       const lines = source.split('\n');
 
       const table = el.createEl('table');
 
       const headRow = table.createTHead().createEl('tr');
-      headings.forEach(text => headRow.createEl('td', { text }));
+      headRow.createEl('td'); // empty td for the large offset
+      for (let i = 0; i < this.settings.bytesPerRow; i++) {
+        headRow.createEl('td', { text: i.toString(this.settings.offsetsInHex ? 16 : 10) });
+      }
 
       const tbody = table.createTBody();
-      let st: TableState = { maxWidth: headings.length, curOffset: 0, curWidth: 1, tbody, curTr: null };
+      let st: TableState = { maxWidth: this.settings.bytesPerRow + 1, curOffset: 0, curWidth: 1, tbody, curTr: null, offsetsHex: this.settings.offsetsInHex };
       for (let line of lines) {
         if (!line.contains(': ')) continue;
         const parts = line.split(': ');
@@ -64,5 +81,50 @@ export default class BytefieldPlugin extends Plugin {
         }
       }
     });
+  }
+
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
+
+  async saveSettings() {
+    await this.saveData(this.settings);
+  }
+}
+
+class BytefieldSettingTab extends PluginSettingTab {
+  plugin: BytefieldPlugin;
+
+  constructor(app: App, plugin: BytefieldPlugin) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
+
+  display() {
+    let { containerEl } = this;
+    containerEl.empty();
+
+    new Setting(containerEl)
+      .setName("Bytes per table row")
+      .setDesc("How many bytes each row of the table will contain.")
+      .addText(text => {
+        text.inputEl.type = 'number';
+        text
+          .setValue('' + this.plugin.settings.bytesPerRow)
+          .onChange(async val => {
+            this.plugin.settings.bytesPerRow = parseInt(val);
+            await this.plugin.saveSettings();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName("Hex offsets")
+      .setDesc("If set, the offsets to the left will be in hex; decimal otherwise.")
+      .addToggle(toggle =>
+        toggle.setValue(this.plugin.settings.offsetsInHex)
+          .onChange(async val => {
+            this.plugin.settings.offsetsInHex = val;
+            await this.plugin.saveSettings();
+          }));
   }
 }
